@@ -25,10 +25,11 @@ The units assume this path:
 Clone the repository there:
 
 ```sh
+USER_NAME="${SUDO_USER:-$USER}"
 sudo mkdir -p /opt/turtle-visualizer
-sudo chown -R pi:pi /opt/turtle-visualizer
+sudo chown -R "$USER_NAME:$USER_NAME" /opt/turtle-visualizer
 cd /opt
-sudo -u pi git clone https://github.com/jpcarrascal/turtle-visualizer.git turtle-visualizer
+sudo -u "$USER_NAME" git clone https://github.com/jpcarrascal/turtle-visualizer.git turtle-visualizer
 ```
 
 Install Node dependencies:
@@ -81,6 +82,6 @@ journalctl -u turtle-visualizer-kiosk.service -f
 
 ## Notes
 
-- The kiosk unit runs as user `pi`. If your device uses a different user, edit `systemd/turtle-visualizer-kiosk.service`.
+- The kiosk unit currently runs as user `pi`. If your device uses a different user, change `User=` in `systemd/turtle-visualizer-kiosk.service` before running `sudo ./scripts/install-systemd.sh`.
 - The default URL is `http://localhost:8080` and can be overridden with `APP_URL` in the kiosk unit.
 - If Cage is not installed, the launcher falls back to Chromium kiosk mode.
