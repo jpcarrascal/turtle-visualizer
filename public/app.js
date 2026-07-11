@@ -15,6 +15,7 @@ const state = {
 boot().catch((error) => setStatus(`Boot failed: ${error.message}`, 'error'));
 
 async function boot() {
+  refreshCursorState();
   setStatus('Loading manifest', 'boot');
   state.manifest = await loadManifest();
   const persisted = loadPersistedSketch();
@@ -38,6 +39,29 @@ async function boot() {
   }
 
   setStatus('Ready', 'ok');
+}
+
+function refreshCursorState() {
+  const applyCursorNone = () => {
+    document.documentElement.style.cursor = 'none';
+    document.body.style.cursor = 'none';
+  };
+
+  const nudge = () => {
+    applyCursorNone();
+    document.dispatchEvent(
+      new MouseEvent('mousemove', {
+        bubbles: true,
+        clientX: Math.max(0, window.innerWidth - 2),
+        clientY: Math.max(0, window.innerHeight - 2)
+      })
+    );
+    applyCursorNone();
+  };
+
+  applyCursorNone();
+  requestAnimationFrame(() => requestAnimationFrame(nudge));
+  setTimeout(nudge, 700);
 }
 
 async function loadManifest() {
