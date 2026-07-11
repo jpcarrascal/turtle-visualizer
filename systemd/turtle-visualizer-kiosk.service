@@ -8,6 +8,7 @@ Type=simple
 User=pi
 Environment=APP_URL=http://localhost:8080
 Environment=HOME=/home/pi
+Environment=XDG_RUNTIME_DIR=/run/user/1000
 ExecStart=/opt/turtle-visualizer/scripts/start-kiosk.sh
 Restart=always
 RestartSec=2

@@ -82,6 +82,23 @@ journalctl -u turtle-visualizer-kiosk.service -f
 
 ## Notes
 
-- The kiosk unit currently runs as user `pi`. If your device uses a different user, change `User=` in `systemd/turtle-visualizer-kiosk.service` before running `sudo ./scripts/install-systemd.sh`.
+- The install script auto-configures the kiosk unit with your login user, home, and runtime directory.
 - The default URL is `http://localhost:8080` and can be overridden with `APP_URL` in the kiosk unit.
-- If Cage is not installed, the launcher falls back to Chromium kiosk mode.
+- If Cage is not installed, kiosk mode requires an existing desktop session (`DISPLAY` or `WAYLAND_DISPLAY`).
+
+## Troubleshooting Kiosk Service
+
+If `turtle-visualizer-kiosk.service` is restarting with `status=1/FAILURE`:
+
+```sh
+journalctl -u turtle-visualizer-kiosk.service -n 80 --no-pager
+```
+
+Common fixes:
+
+```sh
+sudo apt install -y cage chromium-browser || sudo apt install -y cage chromium
+cd /opt/turtle-visualizer
+sudo ./scripts/install-systemd.sh
+sudo systemctl restart turtle-visualizer-kiosk.service
+```
