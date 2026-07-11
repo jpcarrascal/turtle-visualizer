@@ -104,6 +104,29 @@ Rollback to baseline instantly:
 sudo /opt/turtle-visualizer/scripts/rollback-kiosk-baseline.sh
 ```
 
+### Roll Back Explicitly to Cage
+
+If you enabled Weston and want to force Cage mode again:
+
+```sh
+sudo /opt/turtle-visualizer/scripts/rollback-kiosk-baseline.sh
+```
+
+The rollback script does three things:
+
+- removes any `systemctl edit` override on `turtle-visualizer-kiosk.service` (including `KIOSK_COMPOSITOR=weston`)
+- disables/stops `turtle-visualizer-kiosk-refresh.service`
+- restarts `turtle-visualizer-kiosk.service`
+
+Manual equivalent (if needed):
+
+```sh
+sudo systemctl revert turtle-visualizer-kiosk.service
+sudo systemctl disable --now turtle-visualizer-kiosk-refresh.service
+sudo systemctl daemon-reload
+sudo systemctl restart turtle-visualizer-kiosk.service
+```
+
 If the boot cursor still appears, increase the refresh delay (default: 20s):
 
 ```sh
