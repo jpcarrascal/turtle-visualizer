@@ -1,7 +1,7 @@
 [Unit]
 Description=turtle-visualizer kiosk browser
 Wants=turtle-visualizer.service
-After=turtle-visualizer.service systemd-user-sessions.service getty@tty1.service
+After=turtle-visualizer.service systemd-user-sessions.service systemd-logind.service getty@tty1.service
 Conflicts=getty@tty1.service
 
 [Service]
@@ -12,6 +12,7 @@ WorkingDirectory=/opt/turtle-visualizer
 Environment=APP_URL=http://localhost:8080
 Environment=HOME=/home/pi
 Environment=XDG_RUNTIME_DIR=/run/turtle-visualizer
+Environment=LIBSEAT_BACKEND=logind
 RuntimeDirectory=turtle-visualizer
 RuntimeDirectoryMode=0700
 TTYPath=/dev/tty1

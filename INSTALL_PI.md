@@ -113,3 +113,13 @@ sudo ./scripts/install-systemd.sh
 sudo systemctl daemon-reload
 sudo systemctl restart turtle-visualizer-kiosk.service
 ```
+
+If logs still show `Could not open tty0 to update VT: Permission denied`, ensure your local clone includes the latest unit update that forces `LIBSEAT_BACKEND=logind`, then reinstall services:
+
+```sh
+cd /opt/turtle-visualizer
+git pull
+sudo ./scripts/install-systemd.sh
+sudo systemctl daemon-reload
+sudo systemctl restart turtle-visualizer-kiosk.service
+```
