@@ -55,6 +55,12 @@ From inside `/opt/turtle-visualizer`:
 sudo ./scripts/install-systemd.sh
 ```
 
+To keep baseline behavior without boot refresh restarts:
+
+```sh
+sudo KIOSK_ENABLE_REFRESH=0 ./scripts/install-systemd.sh
+```
+
 This installs and enables:
 
 - `turtle-visualizer.service`
@@ -67,6 +73,35 @@ This installs and enables:
 systemctl status turtle-visualizer.service
 systemctl status turtle-visualizer-kiosk.service
 systemctl status turtle-visualizer-kiosk-refresh.service
+```
+
+## Optional: Experimental Weston Compositor Mode
+
+Default kiosk mode uses Cage. To try Weston mode (easy to roll back):
+
+```sh
+sudo apt install -y weston
+sudo systemctl edit turtle-visualizer-kiosk.service
+```
+
+Add:
+
+```ini
+[Service]
+Environment=KIOSK_COMPOSITOR=weston
+```
+
+Then apply:
+
+```sh
+sudo systemctl daemon-reload
+sudo systemctl restart turtle-visualizer-kiosk.service
+```
+
+Rollback to baseline instantly:
+
+```sh
+sudo /opt/turtle-visualizer/scripts/rollback-kiosk-baseline.sh
 ```
 
 If the boot cursor still appears, increase the refresh delay (default: 20s):

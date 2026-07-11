@@ -4,6 +4,7 @@ set -eu
 SCRIPT_DIR="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
 ROOT_DIR="$(CDPATH= cd -- "$SCRIPT_DIR/.." && pwd)"
 INSTALL_USER="${SUDO_USER:-}"
+KIOSK_ENABLE_REFRESH="${KIOSK_ENABLE_REFRESH:-1}"
 
 SERVER_UNIT_SRC="$ROOT_DIR/systemd/turtle-visualizer.service"
 KIOSK_UNIT_SRC="$ROOT_DIR/systemd/turtle-visualizer-kiosk.service"
@@ -41,6 +42,11 @@ rm -f "$tmp_unit" "$tmp_unit.bak" "$tmp_unit.bak2"
 systemctl daemon-reload
 systemctl enable --now turtle-visualizer.service
 systemctl enable --now turtle-visualizer-kiosk.service
-systemctl enable --now turtle-visualizer-kiosk-refresh.service
+
+if [ "$KIOSK_ENABLE_REFRESH" = "1" ]; then
+  systemctl enable --now turtle-visualizer-kiosk-refresh.service
+else
+  systemctl disable --now turtle-visualizer-kiosk-refresh.service || true
+fi
 
 echo "Installed and enabled turtle-visualizer services for user $INSTALL_USER"
