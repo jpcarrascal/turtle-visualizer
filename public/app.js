@@ -3,19 +3,24 @@ const sourceText = document.getElementById('source-text');
 const programText = document.getElementById('program-text');
 
 const storageKey = 'turtle-visualizer:last-good-sketch';
+const KICK_NOTE = 36;
 const state = {
   manifest: [],
   activeSource: null,
   activeProgram: null,
   cc: {},
   socket: null,
-  midiAccess: null
+  midiAccess: null,
+  triggers: {
+    kick: 0
+  }
 };
 
 boot().catch((error) => setStatus(`Boot failed: ${error.message}`, 'error'));
 
 async function boot() {
   refreshCursorState();
+  startTriggerDecayLoop();
   setStatus('Loading manifest', 'boot');
   state.manifest = await loadManifest();
   const persisted = loadPersistedSketch();
@@ -39,6 +44,18 @@ async function boot() {
   }
 
   setStatus('Ready', 'ok');
+}
+
+function startTriggerDecayLoop() {
+  const decay = () => {
+    // Exponential-style decay keeps kick pulses visible but short.
+    state.triggers.kick = Math.max(0, state.triggers.kick * 0.86 - 0.008);
+    window.triggers = state.triggers;
+    requestAnimationFrame(decay);
+  };
+
+  window.triggers = state.triggers;
+  requestAnimationFrame(decay);
 }
 
 function refreshCursorState() {
@@ -136,6 +153,12 @@ function handleMidiMessage(event) {
   const [statusByte, data1, data2 = 0] = event.data;
   const type = statusByte & 0xf0;
   const channel = (statusByte & 0x0f) + 1;
+
+  if (type === 0x90 && data2 > 0 && data1 === KICK_NOTE) {
+    const velocityNormalized = data2 / 127;
+    state.triggers.kick = Math.max(state.triggers.kick, velocityNormalized);
+    window.triggers = state.triggers;
+  }
 
   if (type === 0xb0) {
     state.cc[data1] = data2;
