@@ -29,7 +29,10 @@ async function boot() {
   connectSocket();
   await initializeMidi();
 
-  if (persisted?.code) {
+  if (persisted?.source === 'library' && Number.isInteger(persisted.program)) {
+    // Refresh library sketches from file so saved stale code does not mask recent changes.
+    await selectLibrarySketch(persisted.program, { persist: false });
+  } else if (persisted?.code) {
     state.activeProgram = persisted.program ?? null;
     applySketch(persisted.code, {
       source: persisted.source ?? 'persisted',
@@ -154,9 +157,10 @@ function handleMidiMessage(event) {
   const type = statusByte & 0xf0;
   const channel = (statusByte & 0x0f) + 1;
 
-  if (type === 0x90 && data2 > 0 && KICK_NOTES.has(data1)) {
+  if (type === 0x90 && data2 > 0) {
     const velocityNormalized = data2 / 127;
-    state.triggers.kick = Math.max(state.triggers.kick, velocityNormalized);
+    const gain = KICK_NOTES.has(data1) ? 1 : 0.6;
+    state.triggers.kick = Math.max(state.triggers.kick, velocityNormalized * gain);
     window.triggers = state.triggers;
   }
 
