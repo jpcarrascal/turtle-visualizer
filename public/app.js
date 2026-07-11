@@ -3,7 +3,7 @@ const sourceText = document.getElementById('source-text');
 const programText = document.getElementById('program-text');
 
 const storageKey = 'turtle-visualizer:last-good-sketch';
-const KICK_NOTE = 36;
+const KICK_NOTES = new Set([35, 36]);
 const state = {
   manifest: [],
   activeSource: null,
@@ -154,7 +154,7 @@ function handleMidiMessage(event) {
   const type = statusByte & 0xf0;
   const channel = (statusByte & 0x0f) + 1;
 
-  if (type === 0x90 && data2 > 0 && data1 === KICK_NOTE) {
+  if (type === 0x90 && data2 > 0 && KICK_NOTES.has(data1)) {
     const velocityNormalized = data2 / 127;
     state.triggers.kick = Math.max(state.triggers.kick, velocityNormalized);
     window.triggers = state.triggers;
