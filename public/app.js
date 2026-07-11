@@ -2,6 +2,8 @@ const statusText = document.getElementById('status-text');
 const sourceText = document.getElementById('source-text');
 const programText = document.getElementById('program-text');
 const latencyLastNoteText = document.getElementById('latency-last-note');
+const latencyCallbackDelayText = document.getElementById('latency-callback-delay');
+const latencyPaintDelayText = document.getElementById('latency-paint-delay');
 const latencyLastDelayText = document.getElementById('latency-last-delay');
 const latencyAvgDelayText = document.getElementById('latency-avg-delay');
 const latencyFlash = document.getElementById('latency-flash');
@@ -70,26 +72,33 @@ function initializeLatencyOverlay() {
 
   if (state.latencyOverlay.enabled) {
     latencyLastNoteText.textContent = 'Waiting';
+    latencyCallbackDelayText.textContent = '-';
+    latencyPaintDelayText.textContent = '-';
     latencyLastDelayText.textContent = '-';
     latencyAvgDelayText.textContent = '-';
   }
 }
 
-function markLatencyPulse(note, velocity, channel) {
+function markLatencyPulse(note, velocity, channel, receivedTimeMs) {
   if (!state.latencyOverlay.enabled) {
     return;
   }
 
-  const receivedAt = performance.now();
+  const callbackAt = performance.now();
+  const eventTime = Number.isFinite(receivedTimeMs) ? receivedTimeMs : callbackAt;
+  const callbackLagMs = Math.max(0, callbackAt - eventTime);
   latencyLastNoteText.textContent = `${note} @ ch${channel} v${velocity}`;
+  latencyCallbackDelayText.textContent = `${callbackLagMs.toFixed(2)} ms`;
 
   requestAnimationFrame((paintAt) => {
-    const delayMs = Math.max(0, paintAt - receivedAt);
+    const paintLagMs = Math.max(0, paintAt - callbackAt);
+    const totalLagMs = Math.max(0, paintAt - eventTime);
     state.latencyOverlay.samples += 1;
-    state.latencyOverlay.totalDelayMs += delayMs;
+    state.latencyOverlay.totalDelayMs += totalLagMs;
     const avgDelayMs = state.latencyOverlay.totalDelayMs / state.latencyOverlay.samples;
 
-    latencyLastDelayText.textContent = `${delayMs.toFixed(2)} ms`;
+    latencyPaintDelayText.textContent = `${paintLagMs.toFixed(2)} ms`;
+    latencyLastDelayText.textContent = `${totalLagMs.toFixed(2)} ms`;
     latencyAvgDelayText.textContent = `${avgDelayMs.toFixed(2)} ms (${state.latencyOverlay.samples})`;
 
     latencyFlash.classList.add('is-active');
@@ -237,7 +246,7 @@ function handleMidiMessage(event) {
   const channel = (statusByte & 0x0f) + 1;
 
   if (type === 0x90 && data2 > 0) {
-    markLatencyPulse(data1, data2, channel);
+    markLatencyPulse(data1, data2, channel, event.receivedTime);
     const velocityNormalized = data2 / 127;
     const gain = KICK_NOTES.has(data1) ? 1 : 0.6;
     state.triggers.kick = Math.max(state.triggers.kick, velocityNormalized * gain);

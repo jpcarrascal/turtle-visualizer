@@ -12,8 +12,10 @@
       <section class="latency-overlay" aria-live="polite">
         <div class="latency-overlay__title">Latency Test</div>
         <div class="latency-overlay__row"><span>Last Note</span><strong id="latency-last-note">-</strong></div>
-        <div class="latency-overlay__row"><span>Last Frame Delay</span><strong id="latency-last-delay">-</strong></div>
-        <div class="latency-overlay__row"><span>Average Delay</span><strong id="latency-avg-delay">-</strong></div>
+        <div class="latency-overlay__row"><span>MIDI Callback Lag</span><strong id="latency-callback-delay">-</strong></div>
+        <div class="latency-overlay__row"><span>Paint Lag</span><strong id="latency-paint-delay">-</strong></div>
+        <div class="latency-overlay__row"><span>Total (MIDI to Paint)</span><strong id="latency-last-delay">-</strong></div>
+        <div class="latency-overlay__row"><span>Average Total</span><strong id="latency-avg-delay">-</strong></div>
         <div class="latency-overlay__hint">Enable with ?latency=1</div>
       </section>
       <div id="latency-flash" class="latency-flash" aria-hidden="true"></div>
