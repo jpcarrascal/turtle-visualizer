@@ -16,14 +16,6 @@ sudo apt install -y git nodejs npm chromium-browser cage
 
 If `chromium-browser` is unavailable on your image, install `chromium`.
 
-Optional: if your distro provides `ydotool`, you can install it to park the pointer at screen edge as a fallback.
-If package lookup fails, skip this section.
-
-```sh
-sudo apt install -y ydotool
-sudo systemctl enable --now ydotoold
-```
-
 ## 2. Clone project from GitHub
 
 The units assume this path:
