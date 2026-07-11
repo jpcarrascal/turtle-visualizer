@@ -81,6 +81,22 @@ Default kiosk mode uses Cage. To try Weston mode (easy to roll back):
 
 ```sh
 sudo apt install -y weston
+sudo /opt/turtle-visualizer/scripts/switch-compositor.sh weston
+```
+
+Switch back to Cage:
+
+```sh
+sudo /opt/turtle-visualizer/scripts/switch-compositor.sh cage
+```
+
+The `switch-compositor.sh` helper is the recommended toggle path.
+
+### Manual Weston Enable (if needed)
+
+If you prefer editing the unit directly, this is the manual equivalent:
+
+```sh
 sudo systemctl edit turtle-visualizer-kiosk.service
 ```
 
