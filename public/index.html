@@ -9,6 +9,14 @@
   <body>
     <main class="shell">
       <canvas id="visual-canvas" aria-label="Hydra canvas"></canvas>
+      <section class="latency-overlay" aria-live="polite">
+        <div class="latency-overlay__title">Latency Test</div>
+        <div class="latency-overlay__row"><span>Last Note</span><strong id="latency-last-note">-</strong></div>
+        <div class="latency-overlay__row"><span>Last Frame Delay</span><strong id="latency-last-delay">-</strong></div>
+        <div class="latency-overlay__row"><span>Average Delay</span><strong id="latency-avg-delay">-</strong></div>
+        <div class="latency-overlay__hint">Enable with ?latency=1</div>
+      </section>
+      <div id="latency-flash" class="latency-flash" aria-hidden="true"></div>
       <section class="hud" aria-live="polite">
         <div class="hud__title">turtle-visualizer</div>
         <div class="hud__row"><span>Status</span><strong id="status-text">Starting</strong></div>

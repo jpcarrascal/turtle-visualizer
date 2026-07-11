@@ -1,6 +1,10 @@
 const statusText = document.getElementById('status-text');
 const sourceText = document.getElementById('source-text');
 const programText = document.getElementById('program-text');
+const latencyLastNoteText = document.getElementById('latency-last-note');
+const latencyLastDelayText = document.getElementById('latency-last-delay');
+const latencyAvgDelayText = document.getElementById('latency-avg-delay');
+const latencyFlash = document.getElementById('latency-flash');
 
 const storageKey = 'turtle-visualizer:last-good-sketch';
 const KICK_NOTES = new Set([35, 36]);
@@ -13,6 +17,12 @@ const state = {
   midiAccess: null,
   pendingCcBroadcasts: new Map(),
   ccBroadcastScheduled: false,
+  latencyOverlay: {
+    enabled: false,
+    samples: 0,
+    totalDelayMs: 0,
+    flashTimeoutId: null
+  },
   triggers: {
     kick: 0
   }
@@ -21,6 +31,7 @@ const state = {
 boot().catch((error) => setStatus(`Boot failed: ${error.message}`, 'error'));
 
 async function boot() {
+  initializeLatencyOverlay();
   refreshCursorState();
   startTriggerDecayLoop();
   setStatus('Loading manifest', 'boot');
@@ -49,6 +60,47 @@ async function boot() {
   }
 
   setStatus('Ready', 'ok');
+}
+
+function initializeLatencyOverlay() {
+  const params = new URLSearchParams(window.location.search);
+  const flag = (params.get('latency') ?? params.get('latencyOverlay') ?? '').toLowerCase();
+  state.latencyOverlay.enabled = flag === '1' || flag === 'true' || flag === 'on';
+  document.documentElement.dataset.latencyOverlay = state.latencyOverlay.enabled ? 'on' : 'off';
+
+  if (state.latencyOverlay.enabled) {
+    latencyLastNoteText.textContent = 'Waiting';
+    latencyLastDelayText.textContent = '-';
+    latencyAvgDelayText.textContent = '-';
+  }
+}
+
+function markLatencyPulse(note, velocity, channel) {
+  if (!state.latencyOverlay.enabled) {
+    return;
+  }
+
+  const receivedAt = performance.now();
+  latencyLastNoteText.textContent = `${note} @ ch${channel} v${velocity}`;
+
+  requestAnimationFrame((paintAt) => {
+    const delayMs = Math.max(0, paintAt - receivedAt);
+    state.latencyOverlay.samples += 1;
+    state.latencyOverlay.totalDelayMs += delayMs;
+    const avgDelayMs = state.latencyOverlay.totalDelayMs / state.latencyOverlay.samples;
+
+    latencyLastDelayText.textContent = `${delayMs.toFixed(2)} ms`;
+    latencyAvgDelayText.textContent = `${avgDelayMs.toFixed(2)} ms (${state.latencyOverlay.samples})`;
+
+    latencyFlash.classList.add('is-active');
+    if (state.latencyOverlay.flashTimeoutId !== null) {
+      clearTimeout(state.latencyOverlay.flashTimeoutId);
+    }
+    state.latencyOverlay.flashTimeoutId = setTimeout(() => {
+      latencyFlash.classList.remove('is-active');
+      state.latencyOverlay.flashTimeoutId = null;
+    }, 50);
+  });
 }
 
 function startTriggerDecayLoop() {
@@ -185,6 +237,7 @@ function handleMidiMessage(event) {
   const channel = (statusByte & 0x0f) + 1;
 
   if (type === 0x90 && data2 > 0) {
+    markLatencyPulse(data1, data2, channel);
     const velocityNormalized = data2 / 127;
     const gain = KICK_NOTES.has(data1) ? 1 : 0.6;
     state.triggers.kick = Math.max(state.triggers.kick, velocityNormalized * gain);
