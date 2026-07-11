@@ -11,6 +11,8 @@ const state = {
   cc: {},
   socket: null,
   midiAccess: null,
+  pendingCcBroadcasts: new Map(),
+  ccBroadcastScheduled: false,
   triggers: {
     kick: 0
   }
@@ -152,6 +154,31 @@ function wireMidiInputs(midiAccess) {
   }
 }
 
+function queueCcBroadcast(controller, value, channel) {
+  const key = `${channel}:${controller}`;
+  state.pendingCcBroadcasts.set(key, { controller, value, channel });
+
+  if (state.ccBroadcastScheduled) {
+    return;
+  }
+
+  state.ccBroadcastScheduled = true;
+  requestAnimationFrame(() => {
+    state.ccBroadcastScheduled = false;
+
+    if (!state.socket || state.socket.readyState !== WebSocket.OPEN) {
+      state.pendingCcBroadcasts.clear();
+      return;
+    }
+
+    for (const payload of state.pendingCcBroadcasts.values()) {
+      state.socket.send(JSON.stringify({ type: 'midi:cc', ...payload }));
+    }
+
+    state.pendingCcBroadcasts.clear();
+  });
+}
+
 function handleMidiMessage(event) {
   const [statusByte, data1, data2 = 0] = event.data;
   const type = statusByte & 0xf0;
@@ -166,7 +193,7 @@ function handleMidiMessage(event) {
 
   if (type === 0xb0) {
     state.cc[data1] = data2;
-    state.socket?.send(JSON.stringify({ type: 'midi:cc', controller: data1, value: data2, channel }));
+    queueCcBroadcast(data1, data2, channel);
     return;
   }
 
