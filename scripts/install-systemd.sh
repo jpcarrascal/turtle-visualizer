@@ -4,11 +4,11 @@ set -eu
 SCRIPT_DIR="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
 ROOT_DIR="$(CDPATH= cd -- "$SCRIPT_DIR/.." && pwd)"
 
-SERVER_UNIT_SRC="$ROOT_DIR/systemd/video-turtle.service"
-KIOSK_UNIT_SRC="$ROOT_DIR/systemd/video-turtle-kiosk.service"
+SERVER_UNIT_SRC="$ROOT_DIR/systemd/turtle-visualizer.service"
+KIOSK_UNIT_SRC="$ROOT_DIR/systemd/turtle-visualizer-kiosk.service"
 
-SERVER_UNIT_DST="/etc/systemd/system/video-turtle.service"
-KIOSK_UNIT_DST="/etc/systemd/system/video-turtle-kiosk.service"
+SERVER_UNIT_DST="/etc/systemd/system/turtle-visualizer.service"
+KIOSK_UNIT_DST="/etc/systemd/system/turtle-visualizer-kiosk.service"
 
 if [ "$(id -u)" -ne 0 ]; then
   echo "Run as root: sudo ./scripts/install-systemd.sh" >&2
@@ -24,7 +24,7 @@ install -m 0644 "$SERVER_UNIT_SRC" "$SERVER_UNIT_DST"
 install -m 0644 "$KIOSK_UNIT_SRC" "$KIOSK_UNIT_DST"
 
 systemctl daemon-reload
-systemctl enable --now video-turtle.service
-systemctl enable --now video-turtle-kiosk.service
+systemctl enable --now turtle-visualizer.service
+systemctl enable --now turtle-visualizer-kiosk.service
 
-echo "Installed and enabled video-turtle services"
+echo "Installed and enabled turtle-visualizer services"

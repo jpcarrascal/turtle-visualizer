@@ -2,7 +2,7 @@ const statusText = document.getElementById('status-text');
 const sourceText = document.getElementById('source-text');
 const programText = document.getElementById('program-text');
 
-const storageKey = 'video-turtle:last-good-sketch';
+const storageKey = 'turtle-visualizer:last-good-sketch';
 const state = {
   manifest: [],
   activeSource: null,

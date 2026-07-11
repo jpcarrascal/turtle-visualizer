@@ -1,6 +1,6 @@
-# video-turtle on Raspberry Pi
+# turtle-visualizer on Raspberry Pi
 
-This guide installs and enables video-turtle as:
+This guide installs and enables turtle-visualizer as:
 
 - a Node.js server service on port 8080
 - a kiosk browser service using Cage + Chromium (or Chromium alone)
@@ -11,35 +11,44 @@ Run on Raspberry Pi OS Lite:
 
 ```sh
 sudo apt update
-sudo apt install -y nodejs npm chromium-browser cage
+sudo apt install -y git nodejs npm chromium-browser cage
 ```
 
 If `chromium-browser` is unavailable on your image, install `chromium`.
 
-## 2. Copy project to target path
+## 2. Clone project from GitHub
 
 The units assume this path:
 
-- `/opt/video-turtle`
+- `/opt/turtle-visualizer`
 
-Copy the repo there:
+Clone the repository there:
 
 ```sh
-sudo mkdir -p /opt/video-turtle
-sudo rsync -a --delete ./ /opt/video-turtle/
-sudo chown -R pi:pi /opt/video-turtle
+sudo mkdir -p /opt/turtle-visualizer
+sudo chown -R pi:pi /opt/turtle-visualizer
+cd /opt
+sudo -u pi git clone https://github.com/jpcarrascal/turtle-visualizer.git turtle-visualizer
 ```
 
 Install Node dependencies:
 
 ```sh
-cd /opt/video-turtle
+cd /opt/turtle-visualizer
+npm ci
+```
+
+To update later:
+
+```sh
+cd /opt/turtle-visualizer
+git pull
 npm ci
 ```
 
 ## 3. Install and enable services
 
-From inside `/opt/video-turtle`:
+From inside `/opt/turtle-visualizer`:
 
 ```sh
 sudo ./scripts/install-systemd.sh
@@ -47,14 +56,14 @@ sudo ./scripts/install-systemd.sh
 
 This installs and enables:
 
-- `video-turtle.service`
-- `video-turtle-kiosk.service`
+- `turtle-visualizer.service`
+- `turtle-visualizer-kiosk.service`
 
 ## 4. Check status
 
 ```sh
-systemctl status video-turtle.service
-systemctl status video-turtle-kiosk.service
+systemctl status turtle-visualizer.service
+systemctl status turtle-visualizer-kiosk.service
 ```
 
 Server health endpoint:
@@ -66,12 +75,12 @@ curl -sS http://localhost:8080/healthz
 ## 5. Logs
 
 ```sh
-journalctl -u video-turtle.service -f
-journalctl -u video-turtle-kiosk.service -f
+journalctl -u turtle-visualizer.service -f
+journalctl -u turtle-visualizer-kiosk.service -f
 ```
 
 ## Notes
 
-- The kiosk unit runs as user `pi`. If your device uses a different user, edit `systemd/video-turtle-kiosk.service`.
+- The kiosk unit runs as user `pi`. If your device uses a different user, edit `systemd/turtle-visualizer-kiosk.service`.
 - The default URL is `http://localhost:8080` and can be overridden with `APP_URL` in the kiosk unit.
 - If Cage is not installed, the launcher falls back to Chromium kiosk mode.

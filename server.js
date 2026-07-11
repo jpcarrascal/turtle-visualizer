@@ -159,5 +159,5 @@ function sendText(response, statusCode, body) {
 const port = Number(process.env.PORT ?? 8080);
 
 server.listen(port, () => {
-  console.log(`video-turtle listening on http://localhost:${port}`);
+  console.log(`turtle-visualizer listening on http://localhost:${port}`);
 });

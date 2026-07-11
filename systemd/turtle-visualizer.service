@@ -1,13 +1,13 @@
 [Unit]
-Description=video-turtle Hydra sketch server
+Description=turtle-visualizer Hydra sketch server
 Wants=network-online.target
 After=network-online.target
 
 [Service]
 Type=simple
-WorkingDirectory=/opt/video-turtle
+WorkingDirectory=/opt/turtle-visualizer
 Environment=PORT=8080
-ExecStart=/usr/bin/node /opt/video-turtle/server.js
+ExecStart=/usr/bin/node /opt/turtle-visualizer/server.js
 Restart=always
 RestartSec=2
 

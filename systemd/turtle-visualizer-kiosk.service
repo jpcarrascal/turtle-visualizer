@@ -1,14 +1,14 @@
 [Unit]
-Description=video-turtle kiosk browser
-Wants=video-turtle.service
-After=video-turtle.service
+Description=turtle-visualizer kiosk browser
+Wants=turtle-visualizer.service
+After=turtle-visualizer.service
 
 [Service]
 Type=simple
 User=pi
 Environment=APP_URL=http://localhost:8080
 Environment=HOME=/home/pi
-ExecStart=/opt/video-turtle/scripts/start-kiosk.sh
+ExecStart=/opt/turtle-visualizer/scripts/start-kiosk.sh
 Restart=always
 RestartSec=2
 
