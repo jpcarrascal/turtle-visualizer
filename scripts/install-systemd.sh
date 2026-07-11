@@ -4,7 +4,6 @@ set -eu
 SCRIPT_DIR="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
 ROOT_DIR="$(CDPATH= cd -- "$SCRIPT_DIR/.." && pwd)"
 INSTALL_USER="${SUDO_USER:-}"
-INSTALL_UID=""
 
 SERVER_UNIT_SRC="$ROOT_DIR/systemd/turtle-visualizer.service"
 KIOSK_UNIT_SRC="$ROOT_DIR/systemd/turtle-visualizer-kiosk.service"
@@ -22,8 +21,6 @@ if [ -z "$INSTALL_USER" ]; then
   exit 1
 fi
 
-INSTALL_UID="$(id -u "$INSTALL_USER")"
-
 if [ ! -f "$SERVER_UNIT_SRC" ] || [ ! -f "$KIOSK_UNIT_SRC" ]; then
   echo "Service unit files were not found in the repository" >&2
   exit 1
@@ -35,9 +32,8 @@ tmp_unit="$(mktemp)"
 cp "$KIOSK_UNIT_SRC" "$tmp_unit"
 sed -i.bak "s/^User=.*/User=$INSTALL_USER/" "$tmp_unit"
 sed -i.bak2 "s|^Environment=HOME=.*|Environment=HOME=/home/$INSTALL_USER|" "$tmp_unit"
-sed -i.bak3 "s|^Environment=XDG_RUNTIME_DIR=.*|Environment=XDG_RUNTIME_DIR=/run/user/$INSTALL_UID|" "$tmp_unit"
 install -m 0644 "$tmp_unit" "$KIOSK_UNIT_DST"
-rm -f "$tmp_unit" "$tmp_unit.bak" "$tmp_unit.bak2" "$tmp_unit.bak3"
+rm -f "$tmp_unit" "$tmp_unit.bak" "$tmp_unit.bak2"
 
 systemctl daemon-reload
 systemctl enable --now turtle-visualizer.service

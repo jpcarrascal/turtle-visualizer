@@ -1,14 +1,26 @@
 [Unit]
 Description=turtle-visualizer kiosk browser
 Wants=turtle-visualizer.service
-After=turtle-visualizer.service
+After=turtle-visualizer.service systemd-user-sessions.service getty@tty1.service
+Conflicts=getty@tty1.service
 
 [Service]
 Type=simple
 User=pi
+PAMName=login
+WorkingDirectory=/opt/turtle-visualizer
 Environment=APP_URL=http://localhost:8080
 Environment=HOME=/home/pi
-Environment=XDG_RUNTIME_DIR=/run/user/1000
+Environment=XDG_RUNTIME_DIR=/run/turtle-visualizer
+RuntimeDirectory=turtle-visualizer
+RuntimeDirectoryMode=0700
+TTYPath=/dev/tty1
+TTYReset=yes
+TTYVHangup=yes
+TTYVTDisallocate=yes
+StandardInput=tty
+StandardOutput=journal
+StandardError=journal
 ExecStart=/opt/turtle-visualizer/scripts/start-kiosk.sh
 Restart=always
 RestartSec=2

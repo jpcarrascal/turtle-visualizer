@@ -99,6 +99,17 @@ Common fixes:
 ```sh
 sudo apt install -y cage chromium-browser || sudo apt install -y cage chromium
 cd /opt/turtle-visualizer
+git pull
 sudo ./scripts/install-systemd.sh
+sudo systemctl restart turtle-visualizer-kiosk.service
+```
+
+If logs include `XDG_RUNTIME_DIR is not set` or `Could not open target tty`:
+
+```sh
+cd /opt/turtle-visualizer
+git pull
+sudo ./scripts/install-systemd.sh
+sudo systemctl daemon-reload
 sudo systemctl restart turtle-visualizer-kiosk.service
 ```
