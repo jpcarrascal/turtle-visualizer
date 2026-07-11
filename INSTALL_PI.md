@@ -59,7 +59,7 @@ This installs and enables:
 
 - `turtle-visualizer.service`
 - `turtle-visualizer-kiosk.service`
-- `turtle-visualizer-kiosk-refresh.service` (one-shot restart shortly after boot)
+- `turtle-visualizer-kiosk-refresh.service` (delayed one-shot service that restarts kiosk twice after boot)
 
 ## 4. Check status
 
@@ -67,6 +67,26 @@ This installs and enables:
 systemctl status turtle-visualizer.service
 systemctl status turtle-visualizer-kiosk.service
 systemctl status turtle-visualizer-kiosk-refresh.service
+```
+
+If the boot cursor still appears, increase the refresh delay (default: 20s):
+
+```sh
+sudo systemctl edit turtle-visualizer-kiosk-refresh.service
+```
+
+Add:
+
+```ini
+[Service]
+Environment=KIOSK_REFRESH_DELAY=30
+```
+
+Then apply:
+
+```sh
+sudo systemctl daemon-reload
+sudo systemctl restart turtle-visualizer-kiosk-refresh.service
 ```
 
 Server health endpoint:
