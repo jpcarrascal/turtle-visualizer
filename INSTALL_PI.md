@@ -75,6 +75,48 @@ systemctl status turtle-visualizer-kiosk.service
 systemctl status turtle-visualizer-kiosk-refresh.service
 ```
 
+## MIDI Latency: Practical Tuning Checklist
+
+For this app, the useful latency target is MIDI event to next rendered frame.
+
+1. Use the latest latency overlay metrics (callback/paint/total):
+
+```sh
+sudo /opt/turtle-visualizer/scripts/switch-latency-overlay.sh on
+```
+
+Disable when done:
+
+```sh
+sudo /opt/turtle-visualizer/scripts/switch-latency-overlay.sh off
+```
+
+2. Keep CPU at performance governor during shows:
+
+```sh
+echo performance | sudo tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor
+```
+
+3. Disable unneeded services (only if you do not use them):
+
+```sh
+sudo systemctl disable --now bluetooth.service hciuart.service
+sudo systemctl disable --now avahi-daemon.service avahi-daemon.socket
+sudo systemctl disable --now triggerhappy.service
+sudo systemctl disable --now cups.service cups-browsed.service
+sudo systemctl disable --now ModemManager.service
+```
+
+Inspect currently enabled services before changing anything:
+
+```sh
+systemctl list-unit-files --state=enabled
+```
+
+4. Avoid changing compositor while testing latency. Keep either Weston or Cage fixed for the whole test run.
+
+5. For true end-to-end beat-to-photon latency, use a high-fps camera test (audio path + display path), not browser metrics alone.
+
 ## Optional: Experimental Weston Compositor Mode
 
 Default kiosk mode uses Cage. To try Weston mode (easy to roll back):
@@ -91,6 +133,24 @@ sudo /opt/turtle-visualizer/scripts/switch-compositor.sh cage
 ```
 
 The `switch-compositor.sh` helper is the recommended toggle path.
+
+### Latency Overlay On/Off (Safe with Weston/Cage)
+
+Use this helper to toggle the overlay without touching compositor settings:
+
+```sh
+sudo /opt/turtle-visualizer/scripts/switch-latency-overlay.sh on
+sudo /opt/turtle-visualizer/scripts/switch-latency-overlay.sh off
+```
+
+Optional base URL:
+
+```sh
+sudo /opt/turtle-visualizer/scripts/switch-latency-overlay.sh on http://localhost:8080
+```
+
+Do not use `systemctl revert turtle-visualizer-kiosk.service` to remove only the overlay,
+because revert also removes compositor overrides (for example `KIOSK_COMPOSITOR=weston`).
 
 ### Manual Weston Enable (if needed)
 
