@@ -236,6 +236,42 @@ journalctl -u turtle-visualizer.service -f
 journalctl -u turtle-visualizer-kiosk.service -f
 ```
 
+## MIDI Program Change Reference
+
+Use MIDI Program Change (PC) messages to select sketches.
+
+| PC | Sketch |
+| --- | --- |
+| 0 | Default Drift |
+| 1 | Spacebarman: Black |
+| 2 | Spacebarman: Logo |
+| 3 | Spacebarman: TV Noise |
+| 4 | Spacebarman: Camera |
+| 10 | Spacebarman: Blue Slow Tentacles |
+| 11 | Spacebarman: Pink Blobs |
+| 12 | Spacebarman: Architecture |
+| 13 | Spacebarman: Purple Vertical Lines |
+| 14 | Spacebarman: Purple Noisy Vertical Lines |
+| 15 | Spacebarman: Red Kaleid Blobs |
+| 16 | Spacebarman: Skulls |
+| 17 | Spacebarman: Slow Color |
+| 22 | Spacebarman: Architecture Alt |
+| 23 | Spacebarman: This Body |
+| 24 | Spacebarman: Sexy A |
+| 25 | Spacebarman: Sexy B |
+| 26 | Spacebarman: Pink Slow Tentacles |
+| 27 | Spacebarman: Noise Flash |
+| 28 | Spacebarman: Slow Noise |
+| 29 | Spacebarman: Lockdown |
+| 30 | Spacebarman: Wriggly Blue Lines |
+| 31 | Spacebarman: Wriggly Blue Kaleid |
+| 32 | Spacebarman: QR IG |
+| 100 | Spacebarman: Blue Tentacles Brighter |
+| 110 | Strobe |
+| 111 | Tunnel |
+
+The canonical source is the sketch manifest at `public/sketches/manifest.json`.
+
 ## Notes
 
 - The install script auto-configures the kiosk unit with your login user, home, and runtime directory.
