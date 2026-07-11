@@ -1,0 +1,16 @@
+[Unit]
+Description=video-turtle kiosk browser
+Wants=video-turtle.service
+After=video-turtle.service
+
+[Service]
+Type=simple
+User=pi
+Environment=APP_URL=http://localhost:8080
+Environment=HOME=/home/pi
+ExecStart=/opt/video-turtle/scripts/start-kiosk.sh
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=multi-user.target

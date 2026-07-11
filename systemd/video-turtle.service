@@ -1,0 +1,15 @@
+[Unit]
+Description=video-turtle Hydra sketch server
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/video-turtle
+Environment=PORT=8080
+ExecStart=/usr/bin/node /opt/video-turtle/server.js
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=multi-user.target
