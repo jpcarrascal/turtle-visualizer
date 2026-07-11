@@ -6,6 +6,16 @@ APP_URL="${APP_URL:-http://localhost:8080}"
 CHROMIUM_BIN="$(command -v chromium-browser || command -v chromium || true)"
 CAGE_BIN="$(command -v cage || true)"
 
+# On some Pi Wayland stacks the pointer is drawn by the compositor; disable
+# hardware cursors to let app-level cursor hiding take effect.
+export WLR_NO_HARDWARE_CURSORS=1
+export XCURSOR_SIZE=1
+
+# Hide the Linux virtual terminal text cursor used by tty1 kiosk sessions.
+if command -v setterm >/dev/null 2>&1; then
+  setterm -cursor off >/dev/null 2>&1 || true
+fi
+
 if [ -z "$CHROMIUM_BIN" ]; then
   echo "Chromium is not installed (missing chromium-browser/chromium in PATH)" >&2
   exit 1
