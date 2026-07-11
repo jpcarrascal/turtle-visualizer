@@ -59,12 +59,14 @@ This installs and enables:
 
 - `turtle-visualizer.service`
 - `turtle-visualizer-kiosk.service`
+- `turtle-visualizer-kiosk-refresh.service` (one-shot restart shortly after boot)
 
 ## 4. Check status
 
 ```sh
 systemctl status turtle-visualizer.service
 systemctl status turtle-visualizer-kiosk.service
+systemctl status turtle-visualizer-kiosk-refresh.service
 ```
 
 Server health endpoint:

@@ -1,0 +1,11 @@
+[Unit]
+Description=One-shot kiosk refresh after boot
+After=turtle-visualizer-kiosk.service
+Wants=turtle-visualizer-kiosk.service
+
+[Service]
+Type=oneshot
+ExecStart=/bin/sh -c 'sleep 8; systemctl restart turtle-visualizer-kiosk.service'
+
+[Install]
+WantedBy=multi-user.target
