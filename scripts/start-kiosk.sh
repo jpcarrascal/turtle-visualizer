@@ -4,6 +4,7 @@ set -eu
 SCRIPT_DIR="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
 APP_URL="${APP_URL:-http://localhost:8080}"
 KIOSK_COMPOSITOR="${KIOSK_COMPOSITOR:-cage}"
+KIOSK_EXTRA_FLAGS="${KIOSK_EXTRA_FLAGS:-}"
 
 CHROMIUM_BIN="$(command -v chromium-browser || command -v chromium || true)"
 CAGE_BIN="$(command -v cage || true)"
@@ -24,7 +25,7 @@ if [ -z "$CHROMIUM_BIN" ]; then
   exit 1
 fi
 
-COMMON_FLAGS="--kiosk --no-first-run --disable-session-crashed-bubble --noerrdialogs --disable-infobars --disable-pinch --overscroll-history-navigation=0 --autoplay-policy=no-user-gesture-required --ash-hide-cursor"
+COMMON_FLAGS="--kiosk --no-first-run --disable-session-crashed-bubble --noerrdialogs --disable-infobars --disable-pinch --overscroll-history-navigation=0 --autoplay-policy=no-user-gesture-required --ash-hide-cursor --use-gl=egl --enable-gpu-rasterization --enable-zero-copy --ignore-gpu-blocklist --disable-frame-rate-limit"
 WAYLAND_FLAGS="--enable-features=UseOzonePlatform --ozone-platform=wayland"
 
 if [ "$KIOSK_COMPOSITOR" = "weston" ]; then
@@ -55,11 +56,11 @@ EOF
 fi
 
 if [ -n "$CAGE_BIN" ]; then
-  exec "$CAGE_BIN" -- "$CHROMIUM_BIN" $COMMON_FLAGS $WAYLAND_FLAGS "$APP_URL"
+  exec "$CAGE_BIN" -- "$CHROMIUM_BIN" $COMMON_FLAGS $WAYLAND_FLAGS $KIOSK_EXTRA_FLAGS "$APP_URL"
 fi
 
 if [ -n "${DISPLAY:-}" ] || [ -n "${WAYLAND_DISPLAY:-}" ]; then
-  exec "$CHROMIUM_BIN" $COMMON_FLAGS "$APP_URL"
+  exec "$CHROMIUM_BIN" $COMMON_FLAGS $KIOSK_EXTRA_FLAGS "$APP_URL"
 fi
 
 echo "Cage is not installed and no active DISPLAY/WAYLAND_DISPLAY was found" >&2

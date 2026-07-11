@@ -1,6 +1,7 @@
 const statusText = document.getElementById('status-text');
 const sourceText = document.getElementById('source-text');
 const programText = document.getElementById('program-text');
+const latencyFpsText = document.getElementById('latency-fps');
 const latencyLastNoteText = document.getElementById('latency-last-note');
 const latencyCallbackDelayText = document.getElementById('latency-callback-delay');
 const latencyPaintDelayText = document.getElementById('latency-paint-delay');
@@ -75,6 +76,7 @@ function initializeLatencyOverlay() {
   document.documentElement.dataset.latencyOverlay = state.latencyOverlay.enabled ? 'on' : 'off';
 
   if (state.latencyOverlay.enabled) {
+    latencyFpsText.textContent = '-';
     latencyLastNoteText.textContent = 'Waiting';
     latencyCallbackDelayText.textContent = '-';
     latencyPaintDelayText.textContent = '-';
@@ -126,6 +128,12 @@ function startTriggerDecayLoop() {
     window.triggers = state.triggers;
     window.envDrum = state.envDrum;
     window.ranDrum = state.ranDrum;
+
+    if (state.latencyOverlay.enabled) {
+      const fps = window.__hydraInstance?.synth?.stats?.fps;
+      latencyFpsText.textContent = Number.isFinite(fps) ? `${fps}` : '-';
+    }
+
     requestAnimationFrame(decay);
   };
 

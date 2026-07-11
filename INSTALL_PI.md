@@ -75,6 +75,42 @@ systemctl status turtle-visualizer-kiosk.service
 systemctl status turtle-visualizer-kiosk-refresh.service
 ```
 
+## GPU Acceleration Checklist
+
+Chromium can silently fall back to software rendering (SwiftShader/llvmpipe) on Pi, which looks like "crap graphics" with no visible error.
+
+1. Confirm the full KMS driver is enabled in `/boot/firmware/config.txt`:
+
+```
+dtoverlay=vc4-kms-v3d
+```
+
+Not `vc4-fkms-v3d`, and no leftover `gpu_mem=` split from older tutorials (the KMS driver allocates memory dynamically).
+
+2. Confirm Mesa itself is hardware-accelerated, independent of Chromium:
+
+```sh
+sudo apt install -y mesa-utils
+eglinfo -B
+```
+
+Renderer should say `V3D ...`. If it says `llvmpipe`, this is a kernel/config.txt problem, not a Chromium flag problem.
+
+3. Check Chromium's actual GPU status by pointing the kiosk at `chrome://gpu` temporarily:
+
+```sh
+sudo systemctl stop turtle-visualizer-kiosk.service
+APP_URL=chrome://gpu KIOSK_COMPOSITOR=cage /opt/turtle-visualizer/scripts/start-kiosk.sh
+```
+
+Or grep the journal for a software fallback:
+
+```sh
+journalctl -u turtle-visualizer-kiosk.service -n 200 --no-pager | grep -i swiftshader
+```
+
+4. `start-kiosk.sh` and `start-kiosk-weston-client.sh` already pass `--use-gl=egl --enable-gpu-rasterization --enable-zero-copy --ignore-gpu-blocklist --disable-frame-rate-limit`. Restart the kiosk service after any `config.txt` change (a full reboot is required for `dtoverlay` changes to take effect).
+
 ## MIDI Latency: Practical Tuning Checklist
 
 For this app, the useful latency target is MIDI event to next rendered frame.
