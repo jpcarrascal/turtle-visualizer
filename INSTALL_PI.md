@@ -11,14 +11,16 @@ Run on Raspberry Pi OS Lite:
 
 ```sh
 sudo apt update
-sudo apt install -y git nodejs npm chromium-browser cage ydotool
+sudo apt install -y git nodejs npm chromium-browser cage
 ```
 
 If `chromium-browser` is unavailable on your image, install `chromium`.
 
-Enable the ydotool daemon (used to park the cursor at screen edge as a fallback):
+Optional: if your distro provides `ydotool`, you can install it to park the pointer at screen edge as a fallback.
+If package lookup fails, skip this section.
 
 ```sh
+sudo apt install -y ydotool
 sudo systemctl enable --now ydotoold
 ```
 
