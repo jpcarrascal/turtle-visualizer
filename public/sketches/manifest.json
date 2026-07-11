@@ -7,11 +7,131 @@
   },
   {
     "pc": 1,
+    "file": "spacebarman-legacy.js",
+    "name": "Spacebarman: Black"
+  },
+  {
+    "pc": 2,
+    "file": "spacebarman-legacy.js",
+    "name": "Spacebarman: Logo"
+  },
+  {
+    "pc": 3,
+    "file": "spacebarman-legacy.js",
+    "name": "Spacebarman: TV Noise"
+  },
+  {
+    "pc": 4,
+    "file": "spacebarman-legacy.js",
+    "name": "Spacebarman: Camera"
+  },
+  {
+    "pc": 10,
+    "file": "spacebarman-legacy.js",
+    "name": "Spacebarman: Blue Slow Tentacles"
+  },
+  {
+    "pc": 11,
+    "file": "spacebarman-legacy.js",
+    "name": "Spacebarman: Pink Blobs"
+  },
+  {
+    "pc": 12,
+    "file": "spacebarman-legacy.js",
+    "name": "Spacebarman: Architecture"
+  },
+  {
+    "pc": 13,
+    "file": "spacebarman-legacy.js",
+    "name": "Spacebarman: Purple Vertical Lines"
+  },
+  {
+    "pc": 14,
+    "file": "spacebarman-legacy.js",
+    "name": "Spacebarman: Purple Noisy Vertical Lines"
+  },
+  {
+    "pc": 15,
+    "file": "spacebarman-legacy.js",
+    "name": "Spacebarman: Red Kaleid Blobs"
+  },
+  {
+    "pc": 16,
+    "file": "spacebarman-legacy.js",
+    "name": "Spacebarman: Skulls"
+  },
+  {
+    "pc": 17,
+    "file": "spacebarman-legacy.js",
+    "name": "Spacebarman: Slow Color"
+  },
+  {
+    "pc": 22,
+    "file": "spacebarman-legacy.js",
+    "name": "Spacebarman: Architecture Alt"
+  },
+  {
+    "pc": 23,
+    "file": "spacebarman-legacy.js",
+    "name": "Spacebarman: This Body"
+  },
+  {
+    "pc": 24,
+    "file": "spacebarman-legacy.js",
+    "name": "Spacebarman: Sexy A"
+  },
+  {
+    "pc": 25,
+    "file": "spacebarman-legacy.js",
+    "name": "Spacebarman: Sexy B"
+  },
+  {
+    "pc": 26,
+    "file": "spacebarman-legacy.js",
+    "name": "Spacebarman: Pink Slow Tentacles"
+  },
+  {
+    "pc": 27,
+    "file": "spacebarman-legacy.js",
+    "name": "Spacebarman: Noise Flash"
+  },
+  {
+    "pc": 28,
+    "file": "spacebarman-legacy.js",
+    "name": "Spacebarman: Slow Noise"
+  },
+  {
+    "pc": 29,
+    "file": "spacebarman-legacy.js",
+    "name": "Spacebarman: Lockdown"
+  },
+  {
+    "pc": 30,
+    "file": "spacebarman-legacy.js",
+    "name": "Spacebarman: Wriggly Blue Lines"
+  },
+  {
+    "pc": 31,
+    "file": "spacebarman-legacy.js",
+    "name": "Spacebarman: Wriggly Blue Kaleid"
+  },
+  {
+    "pc": 32,
+    "file": "spacebarman-legacy.js",
+    "name": "Spacebarman: QR IG"
+  },
+  {
+    "pc": 100,
+    "file": "spacebarman-legacy.js",
+    "name": "Spacebarman: Blue Tentacles Brighter"
+  },
+  {
+    "pc": 110,
     "file": "strobe.js",
     "name": "Strobe"
   },
   {
-    "pc": 2,
+    "pc": 111,
     "file": "tunnel.js",
     "name": "Tunnel"
   }

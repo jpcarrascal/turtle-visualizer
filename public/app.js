@@ -15,6 +15,10 @@ const state = {
   activeSource: null,
   activeProgram: null,
   cc: {},
+  ccs: Array.from({ length: 128 }, () => 0),
+  envDrum: Array.from({ length: 128 }, () => 0),
+  ranDrum: Array.from({ length: 128 }, () => 0),
+  programs: [],
   socket: null,
   midiAccess: null,
   pendingCcBroadcasts: new Map(),
@@ -116,11 +120,18 @@ function startTriggerDecayLoop() {
   const decay = () => {
     // Exponential-style decay keeps kick pulses visible but short.
     state.triggers.kick = Math.max(0, state.triggers.kick * 0.86 - 0.008);
+    for (let i = 0; i < state.envDrum.length; i += 1) {
+      state.envDrum[i] = Math.max(0, state.envDrum[i] * 0.92 - 0.0025);
+    }
     window.triggers = state.triggers;
+    window.envDrum = state.envDrum;
+    window.ranDrum = state.ranDrum;
     requestAnimationFrame(decay);
   };
 
   window.triggers = state.triggers;
+  window.envDrum = state.envDrum;
+  window.ranDrum = state.ranDrum;
   requestAnimationFrame(decay);
 }
 
@@ -245,8 +256,18 @@ function handleMidiMessage(event) {
   const type = statusByte & 0xf0;
   const channel = (statusByte & 0x0f) + 1;
 
+  if (type === 0x80 || (type === 0x90 && data2 === 0)) {
+    state.envDrum[data1] = 0;
+    window.envDrum = state.envDrum;
+    return;
+  }
+
   if (type === 0x90 && data2 > 0) {
     markLatencyPulse(data1, data2, channel, event.receivedTime);
+    state.envDrum[data1] = Math.max(state.envDrum[data1], data2 / 127);
+    state.ranDrum[data1] = Math.random();
+    window.envDrum = state.envDrum;
+    window.ranDrum = state.ranDrum;
     const velocityNormalized = data2 / 127;
     const gain = KICK_NOTES.has(data1) ? 1 : 0.6;
     state.triggers.kick = Math.max(state.triggers.kick, velocityNormalized * gain);
@@ -255,6 +276,8 @@ function handleMidiMessage(event) {
 
   if (type === 0xb0) {
     state.cc[data1] = data2;
+    state.ccs[data1] = data2 / 127;
+    window.ccs = state.ccs;
     queueCcBroadcast(data1, data2, channel);
     return;
   }
@@ -282,7 +305,11 @@ function initializeHydra() {
     makeGlobal: true
   });
   window.cc = state.cc;
+  window.ccs = state.ccs;
   window.midi = state.midiAccess;
+  window.envDrum = state.envDrum;
+  window.ranDrum = state.ranDrum;
+  window.programs = state.programs;
   return window.__hydraInstance;
 }
 
@@ -299,6 +326,7 @@ async function selectLibrarySketch(program, options = {}) {
   }
 
   const code = await response.text();
+  window.__selectedProgram = program;
   applySketch(code, { source: 'library', label: entry.name ?? entry.file, program });
 
   if (options.persist !== false) {
@@ -312,7 +340,11 @@ async function selectLibrarySketch(program, options = {}) {
 
 function applySketch(code, metadata = {}) {
   window.cc = state.cc;
+  window.ccs = state.ccs;
   window.midi = state.midiAccess;
+  window.envDrum = state.envDrum;
+  window.ranDrum = state.ranDrum;
+  window.programs = state.programs;
 
   try {
     runSketch(code, metadata);
@@ -332,7 +364,11 @@ function applySketch(code, metadata = {}) {
 function runSketch(code, metadata) {
   initializeHydra();
   window.cc = state.cc;
+  window.ccs = state.ccs;
   window.midi = state.midiAccess;
+  window.envDrum = state.envDrum;
+  window.ranDrum = state.ranDrum;
+  window.programs = state.programs;
   const evaluator = new Function(code);
   evaluator();
 }
