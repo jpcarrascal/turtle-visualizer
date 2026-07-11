@@ -18,9 +18,16 @@ body {
   font-family: Inter, ui-sans-serif, system-ui, sans-serif;
 }
 
+html,
+body,
+body *,
+body *::before,
+body *::after {
+  cursor: none !important;
+}
+
 body {
   overflow: hidden;
-  cursor: none;
 }
 
 .shell {
