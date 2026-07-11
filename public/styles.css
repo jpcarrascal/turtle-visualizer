@@ -139,3 +139,7 @@ body {
 html[data-latency-overlay='on'] .latency-overlay {
   display: block;
 }
+
+html[data-latency-overlay='on'] .hud {
+  display: block;
+}
