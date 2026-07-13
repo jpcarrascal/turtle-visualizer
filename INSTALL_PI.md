@@ -3,7 +3,11 @@
 This guide installs and enables turtle-visualizer as:
 
 - a Node.js server service on port 8080
-- a kiosk browser service using Cage + Chromium (or Chromium alone)
+- a kiosk browser service using Cage + Chromium (default) or Weston + Chromium (see Compositor Choice below)
+
+## 0. OS Version
+
+Use **Raspberry Pi OS Lite 64-bit, Bookworm**. Avoid Trixie for now: as of 2026-07, Trixie's packaged Chromium (`150.0.7871.100`) crashes its GPU process during initialization on Pi 4 (V3D/Mesa) regardless of which GL backend is requested. After enough crashes, Chromium permanently disables all GPU features for the rest of the session (`chrome://gpu` shows "GPU process was unable to boot: GPU access is disabled due to frequent crashes"). This is not fixable with Chromium command-line flags — it happens before flags have any effect. Re-check this if you must use Trixie in the future, in case an updated Chromium package fixes it. Bookworm + Pi 4 + Chromium is a mature, widely field-tested combination and did not show this problem.
 
 ## 1. Install system packages
 
@@ -77,7 +81,7 @@ systemctl status turtle-visualizer-kiosk-refresh.service
 
 ## GPU Acceleration Checklist
 
-Chromium can silently fall back to software rendering (SwiftShader/llvmpipe) on Pi, which looks like "crap graphics" with no visible error.
+Chromium can silently fall back to software rendering, or in the worst case disable GPU features entirely after repeated crashes. Both look like "crap graphics" or a frozen/blank canvas with no obvious error on screen.
 
 1. Confirm the full KMS driver is enabled in `/boot/firmware/config.txt`:
 
@@ -96,20 +100,54 @@ eglinfo -B
 
 Renderer should say `V3D ...`. If it says `llvmpipe`, this is a kernel/config.txt problem, not a Chromium flag problem.
 
-3. Check Chromium's actual GPU status by pointing the kiosk at `chrome://gpu` temporarily:
+3. Check Chromium's actual GPU status with the bundled diagnostic script. Chromium refuses `chrome://` URLs as a kiosk launch argument (it silently opens something else instead), so pointing `APP_URL` at `chrome://gpu` directly does not work — use the script instead, which drives the already-running kiosk tab over the DevTools protocol:
 
 ```sh
-sudo systemctl stop turtle-visualizer-kiosk.service
-APP_URL=chrome://gpu KIOSK_COMPOSITOR=cage /opt/turtle-visualizer/scripts/start-kiosk.sh
+sudo systemctl edit turtle-visualizer-kiosk.service
 ```
 
-Or grep the journal for a software fallback:
+Add:
+```ini
+[Service]
+Environment=KIOSK_EXTRA_FLAGS=--remote-debugging-port=9222
+```
 
 ```sh
-journalctl -u turtle-visualizer-kiosk.service -n 200 --no-pager | grep -i swiftshader
+sudo systemctl daemon-reload
+sudo systemctl restart turtle-visualizer-kiosk.service
+cd /opt/turtle-visualizer
+node scripts/check-gpu-status.mjs
 ```
 
-4. `start-kiosk.sh` and `start-kiosk-weston-client.sh` already pass `--use-gl=egl --enable-gpu-rasterization --enable-zero-copy --ignore-gpu-blocklist --disable-frame-rate-limit`. Restart the kiosk service after any `config.txt` change (a full reboot is required for `dtoverlay` changes to take effect).
+This prints the full `chrome://gpu` status page to your terminal, including "Problems Detected" (specific disabled features and reasons) and "Graphics Feature Status". When done, remove the override — note this also clears any other active drop-ins (compositor choice, latency overlay), see [Compositor Choice](#compositor-choice-cage-vs-weston) below:
+
+```sh
+sudo systemctl revert turtle-visualizer-kiosk.service
+sudo systemctl daemon-reload
+sudo systemctl restart turtle-visualizer-kiosk.service
+```
+
+4. `start-kiosk.sh` and `start-kiosk-weston-client.sh` currently pass `--use-gl=egl --enable-gpu-rasterization --enable-zero-copy --ignore-gpu-blocklist --disable-frame-rate-limit`. These were added while chasing the Trixie GPU crash described above and may not be needed on Bookworm — check `chrome://gpu` with the script above on a fresh install before assuming they're required. `--ignore-gpu-blocklist` in particular is a diagnostic override; don't leave it on permanently without a reason, since it can force-enable GPU paths Chromium has deliberately blocklisted for known bugs.
+
+Restart the kiosk service after any `config.txt` change (a full reboot is required for `dtoverlay` changes to take effect).
+
+### KIOSK_EXTRA_FLAGS Quoting
+
+`KIOSK_EXTRA_FLAGS` (or any `Environment=` override with more than one space-separated value) needs to be wrapped in double quotes, or systemd silently drops everything after the first flag:
+
+```ini
+# Wrong — only --remote-debugging-port=9222 survives, the rest are dropped
+Environment=KIOSK_EXTRA_FLAGS=--remote-debugging-port=9222 --enable-unsafe-swiftshader
+
+# Right
+Environment="KIOSK_EXTRA_FLAGS=--remote-debugging-port=9222 --enable-unsafe-swiftshader"
+```
+
+Check for this if a multi-flag override seems to have no effect:
+
+```sh
+journalctl -u turtle-visualizer-kiosk.service -n 50 --no-pager | grep -i "invalid environment assignment"
+```
 
 ## MIDI Latency: Practical Tuning Checklist
 
@@ -153,9 +191,9 @@ systemctl list-unit-files --state=enabled
 
 5. For true end-to-end beat-to-photon latency, use a high-fps camera test (audio path + display path), not browser metrics alone.
 
-## Optional: Experimental Weston Compositor Mode
+## Compositor Choice: Cage vs Weston
 
-Default kiosk mode uses Cage. To try Weston mode (easy to roll back):
+Default kiosk mode uses Cage — it's simpler, with fewer moving parts. In practice, Cage's cursor hiding has been unreliable on at least one real setup (the mouse cursor stayed visible despite `WLR_NO_HARDWARE_CURSORS`, CSS `cursor: none`, and the app's own cursor-parking trick in `refreshCursorState()`). Switching to Weston has reliably fixed cursor visibility when that happens:
 
 ```sh
 sudo apt install -y weston
@@ -168,7 +206,7 @@ Switch back to Cage:
 sudo /opt/turtle-visualizer/scripts/switch-compositor.sh cage
 ```
 
-The `switch-compositor.sh` helper is the recommended toggle path.
+The `switch-compositor.sh` helper is the recommended toggle path. If cursor visibility matters for your install (e.g. anything public-facing) and you'd rather not troubleshoot Cage's cursor behavior first, it's reasonable to just start with Weston.
 
 ### Latency Overlay On/Off (Safe with Weston/Cage)
 
@@ -313,6 +351,8 @@ The canonical source is the sketch manifest at `public/sketches/manifest.json`.
 - The install script auto-configures the kiosk unit with your login user, home, and runtime directory.
 - The default URL is `http://localhost:8080` and can be overridden with `APP_URL` in the kiosk unit.
 - If Cage is not installed, kiosk mode requires an existing desktop session (`DISPLAY` or `WAYLAND_DISPLAY`).
+- `KIOSK_EXTRA_FLAGS` lets you pass ad hoc Chromium flags (e.g. for debugging) without editing the launch scripts — see [KIOSK_EXTRA_FLAGS Quoting](#kiosk_extra_flags-quoting) for the systemd gotcha.
+- `scripts/check-gpu-status.mjs` reads the live `chrome://gpu` status via the DevTools protocol — see the GPU Acceleration Checklist above.
 
 ## Troubleshooting Kiosk Service
 
@@ -351,3 +391,5 @@ sudo ./scripts/install-systemd.sh
 sudo systemctl daemon-reload
 sudo systemctl restart turtle-visualizer-kiosk.service
 ```
+
+If the app boots to a "Boot failed: ..." status and the page's own `canvas.getContext('webgl')` returns `null` (check via `scripts/check-gpu-status.mjs` or a DevTools console), and `chrome://gpu` shows "GPU access is disabled due to frequent crashes", this is a GPU-process crash loop, not a config problem — see the OS Version note at the top of this guide. Do not try `start-kiosk.sh` directly over SSH to debug this manually: it will fail with `libseat`/"Could not open target tty" errors, because an SSH shell has no VT/seat session. Always debug through the systemd service (`systemctl start/restart` + `journalctl`), which runs correctly on `tty1`.

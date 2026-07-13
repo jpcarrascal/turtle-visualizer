@@ -51,7 +51,7 @@ This spec intentionally leaves the exact browser launch stack open so the implem
 Use these as the default implementation choices unless a later decision changes them:
 
 - Raspberry Pi OS Lite as the base image.
-- Cage as the minimal Wayland compositor, or the closest equivalent if Cage is unavailable.
+- Cage as the minimal Wayland compositor by default. In practice, Cage's cursor hiding has been unreliable on at least one real setup; Weston (heavier, but with working cursor hiding via `kiosk-shell.so`) is a validated fallback — see `INSTALL_PI.md`'s Compositor Choice section. Raspberry Pi OS Bookworm is the validated target OS; Trixie's Chromium build (`150.0.7871.100` as observed) has a GPU-process crash loop on Pi 4 that disables all GPU acceleration.
 - Chromium as the browser runtime.
 - `http://localhost` or another local HTTP origin for the app.
 - `rtpmidid` or an equivalent RTP-MIDI bridge for MIDI-over-network.
