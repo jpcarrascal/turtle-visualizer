@@ -25,7 +25,7 @@ if [ -z "$CHROMIUM_BIN" ]; then
   exit 1
 fi
 
-COMMON_FLAGS="--kiosk --no-first-run --disable-session-crashed-bubble --noerrdialogs --disable-infobars --disable-pinch --overscroll-history-navigation=0 --autoplay-policy=no-user-gesture-required --ash-hide-cursor --use-gl=egl --enable-gpu-rasterization --enable-zero-copy --ignore-gpu-blocklist --disable-frame-rate-limit"
+COMMON_FLAGS="--kiosk --no-first-run --disable-session-crashed-bubble --noerrdialogs --disable-infobars --disable-pinch --overscroll-history-navigation=0 --autoplay-policy=no-user-gesture-required --ash-hide-cursor"
 WAYLAND_FLAGS="--enable-features=UseOzonePlatform --ozone-platform=wayland"
 
 if [ "$KIOSK_COMPOSITOR" = "weston" ]; then

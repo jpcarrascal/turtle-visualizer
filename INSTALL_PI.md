@@ -127,7 +127,7 @@ sudo systemctl daemon-reload
 sudo systemctl restart turtle-visualizer-kiosk.service
 ```
 
-4. `start-kiosk.sh` and `start-kiosk-weston-client.sh` currently pass `--use-gl=egl --enable-gpu-rasterization --enable-zero-copy --ignore-gpu-blocklist --disable-frame-rate-limit`. These were added while chasing the Trixie GPU crash described above and may not be needed on Bookworm — check `chrome://gpu` with the script above on a fresh install before assuming they're required. `--ignore-gpu-blocklist` in particular is a diagnostic override; don't leave it on permanently without a reason, since it can force-enable GPU paths Chromium has deliberately blocklisted for known bugs.
+4. Do not pass `--use-gl=egl`. Modern Chromium only accepts ANGLE-based GL implementations on Linux — `chrome://gpu` reports the allowed set as `[(gl=egl-angle,angle=opengl),(gl=egl-angle,angle=opengles),(gl=egl-angle,angle=vulkan)]`. Requesting the bare `egl` implementation fails GPU process init, and repeated failures trip Chromium's circuit breaker, which disables all GPU features for the session ("GPU access is disabled due to frequent crashes", even with a crash count of 0). If you need to steer the backend explicitly, use `--use-angle=gles` (or `--use-angle=vulkan`) instead. The launch scripts intentionally pass no GL flags at all — Chromium's defaults are correct here.
 
 Restart the kiosk service after any `config.txt` change (a full reboot is required for `dtoverlay` changes to take effect).
 
