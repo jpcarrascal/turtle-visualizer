@@ -297,6 +297,16 @@ function handleMidiMessage(event) {
   }
 }
 
+function readRenderScale() {
+  const params = new URLSearchParams(window.location.search);
+  const raw = Number.parseFloat(params.get('scale') ?? '');
+  if (!Number.isFinite(raw) || raw <= 0 || raw > 1) {
+    return 1;
+  }
+
+  return raw;
+}
+
 function initializeHydra() {
   if (window.__hydraInstance) {
     return window.__hydraInstance;
@@ -309,8 +319,11 @@ function initializeHydra() {
   const canvas = document.getElementById('visual-canvas');
   // Hydra adopts the canvas's existing size rather than setting one, so an unsized
   // canvas renders at the 300x150 HTML default and gets CSS-stretched to the display.
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
+  // ?scale= renders below native resolution and lets CSS upscale, which is often the
+  // difference between a usable and unusable frame rate on Pi-class GPUs.
+  const scale = readRenderScale();
+  canvas.width = Math.max(1, Math.round(window.innerWidth * scale));
+  canvas.height = Math.max(1, Math.round(window.innerHeight * scale));
   window.__hydraInstance = new window.Hydra({
     detectAudio: false,
     canvas,

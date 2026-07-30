@@ -15,6 +15,11 @@ const PROBE = `(() => {
   const gl = canvas.getContext('webgl');
   if (!gl) return { width: canvas.width, height: canvas.height, rect, error: 'getContext(webgl) returned null' };
   const glError = gl.getError();
+  // Definitive per-context check: a hardware path reports the real GPU here
+  // (e.g. "V3D 4.2"), a software fallback reports SwiftShader.
+  const dbg = gl.getExtension('WEBGL_debug_renderer_info');
+  const renderer = dbg ? gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL) : gl.getParameter(gl.RENDERER);
+  const vendor = dbg ? gl.getParameter(dbg.UNMASKED_VENDOR_WEBGL) : gl.getParameter(gl.VENDOR);
   const pixel = new Uint8Array(4);
   try {
     gl.readPixels(0, 0, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixel);
@@ -26,6 +31,8 @@ const PROBE = `(() => {
     height: canvas.height,
     rect: { width: rect.width, height: rect.height },
     glError,
+    renderer,
+    vendor,
     pixelAt00: Array.from(pixel),
     hydraFps: window.__hydraInstance?.synth?.stats?.fps ?? null,
     activeSource: window.__hydraInstance ? 'hydra instance exists' : 'no hydra instance'
