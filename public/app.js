@@ -307,6 +307,10 @@ function initializeHydra() {
   }
 
   const canvas = document.getElementById('visual-canvas');
+  // Hydra adopts the canvas's existing size rather than setting one, so an unsized
+  // canvas renders at the 300x150 HTML default and gets CSS-stretched to the display.
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
   window.__hydraInstance = new window.Hydra({
     detectAudio: false,
     canvas,
