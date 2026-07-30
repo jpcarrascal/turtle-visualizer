@@ -10,7 +10,7 @@ import WebSocket from 'ws';
 const DEBUG_PORT = process.env.DEBUG_PORT ?? '9222';
 
 async function main() {
-  const res = await fetch(`http://localhost:${DEBUG_PORT}/json`);
+  const res = await fetch(`http://127.0.0.1:${DEBUG_PORT}/json`);
   if (!res.ok) {
     throw new Error(`Could not reach DevTools endpoint: ${res.status}`);
   }
@@ -20,7 +20,10 @@ async function main() {
     throw new Error('No inspectable page found. Is the kiosk running with --remote-debugging-port set?');
   }
 
-  const ws = new WebSocket(target.webSocketDebuggerUrl);
+  // Chromium reports this with the literal hostname "localhost", which can hit the
+  // same IPv4/IPv6 loopback resolution mismatch as the /json fetch above.
+  const debuggerUrl = target.webSocketDebuggerUrl.replace('localhost', '127.0.0.1');
+  const ws = new WebSocket(debuggerUrl);
   let nextId = 0;
 
   function send(method, params = {}) {
