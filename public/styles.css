@@ -52,8 +52,10 @@ body {
   padding: 16px 18px;
   border: 1px solid var(--panel-border);
   border-radius: 16px;
+  /* No backdrop-filter: blurring a backdrop that changes every frame cannot be
+     cached, and on Pi-class GPUs it cost roughly 4x the entire frame budget --
+     the debug HUD was dominating the performance it was there to measure. */
   background: var(--panel);
-  backdrop-filter: blur(16px);
   box-shadow: 0 18px 50px rgba(0, 0, 0, 0.28);
 }
 
@@ -87,9 +89,8 @@ body {
   padding: 14px 16px;
   border: 1px solid rgba(145, 239, 216, 0.5);
   border-radius: 14px;
-  background: rgba(6, 10, 18, 0.78);
+  background: rgba(6, 10, 18, 0.92);
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
-  backdrop-filter: blur(12px);
   z-index: 30;
 }
 
